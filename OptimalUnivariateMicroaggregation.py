@@ -10,7 +10,7 @@ data = pd.read_csv(sys.argv[2], header=None)
 
 def OptimalUnivariantMicroaggregation():
     new_df = pd.DataFrame()
-    for column in range(1,len(data.columns)):
+    for column in range(len(data.columns)):
         partition = data.iloc[:, column]
         partition = partition.sort_values()
         init_graph = []
@@ -27,8 +27,8 @@ def OptimalUnivariantMicroaggregation():
         new_values = []
         follow = shortest_path[1]
         actual = "g0"
-        ind = 2
-        while (ind < len(shortest_path)):
+        for ind in range(1,len(shortest_path)):
+            follow = shortest_path[ind]
             upper_lim = int(''.join(filter(str.isdigit, follow)))
             lower_lim = int(''.join(filter(str.isdigit, actual))) + 1
             cont = 0
@@ -40,8 +40,6 @@ def OptimalUnivariantMicroaggregation():
             for i in range(lower_lim,upper_lim+1):
                 new_values.insert(0,mean)
             actual = follow
-            follow = shortest_path[ind]
-            ind = ind + 1
         new_df[column] = new_values
 
     return new_df
