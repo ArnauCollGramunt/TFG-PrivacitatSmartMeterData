@@ -5,10 +5,12 @@ import sys
 k = int(sys.argv[1])
 data = pd.read_csv(sys.argv[2], header=None)
 
+data['row_id'] = range(len(data))
+
 def mondrian():
     ranks={}
 
-    for columns in range(len(data.columns)):
+    for columns in range(len(data.columns) - 1):
         ranks[columns] = len(set(data.iloc[:, columns]))
     
     ranks = sorted(ranks.items(), key=lambda t: t[1], reverse=True)
@@ -27,7 +29,7 @@ def mondrianRec(partition, dim):
     if(len(lhs) >= k and len(rhs) >= k):
         return pd.concat([mondrianRec(lhs,dim),mondrianRec(rhs,dim)])
     
-    for columns in range(len(data.columns)):
+    for columns in range(len(data.columns) - 1):
         partition = partition.sort_values(by=partition.columns[dim])
         new = partition.iloc[:, columns].mean()
         partition.iloc[:, columns] = new
@@ -36,4 +38,8 @@ def mondrianRec(partition, dim):
 
 example = mondrian()
 
-example.to_csv("example.csv",index=False)
+example = example.sort_values(by='row_id')
+
+example.drop(columns=['row_id'],inplace=True)
+
+example.to_csv("maskedMondrian.csv",index=False, header=False)

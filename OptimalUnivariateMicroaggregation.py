@@ -8,13 +8,16 @@ INFINITY = float("inf")
 k = int(sys.argv[1])
 data = pd.read_csv(sys.argv[2], header=None)
 
+data['row_id'] = range(len(data))
+
 def OptimalUnivariantMicroaggregation():
     new_df = pd.DataFrame()
-    for column in range(len(data.columns)):
-        partition = data.iloc[:, column]
-        partition = partition.sort_values()
+    for column in range(len(data.columns) - 1):
+        partition = data.iloc[:, [column, -1]]
+        partition = partition.sort_values(by=column)
         init_graph = []
-        nodes = ["g0"] + partition.to_list()
+        nodes = ["g0"] + partition.iloc[:, 0].to_list()
+        original_values = partition.iloc[:, 1].to_list()
         for i in range(len(nodes)):
             for j in range(i + k, min(i + 2 * k, len(nodes))):
                 cluster_values = nodes[i + 1 : j + 1]
@@ -25,6 +28,8 @@ def OptimalUnivariantMicroaggregation():
         graph = Graph(init_graph)
         shortest_path, cost = graph.shortest_path("g0",f"g{len(nodes)-1}") 
         new_values = []
+        while len(new_values) < data.shape[0]:
+            new_values.insert(0, None)
         follow = shortest_path[1]
         actual = "g0"
         for ind in range(1,len(shortest_path)):
@@ -38,7 +43,7 @@ def OptimalUnivariantMicroaggregation():
                 div = div + 1
             mean = cont / div
             for i in range(lower_lim,upper_lim+1):
-                new_values.insert(0,mean)
+                new_values[original_values[i-1]] = mean
             actual = follow
         new_df[column] = new_values
 
@@ -134,4 +139,4 @@ class Graph:
 
 example_df = OptimalUnivariantMicroaggregation()
 
-example_df.to_csv("maskedDataOUM.csv", index=False)
+example_df.to_csv("maskedDataOUM.csv", index=False, header=False)
