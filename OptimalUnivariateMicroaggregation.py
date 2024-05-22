@@ -5,12 +5,8 @@ from collections import deque
 
 INFINITY = float("inf")
 
-k = int(sys.argv[1])
-data = pd.read_csv(sys.argv[2], header=None)
-
-data['row_id'] = range(len(data))
-
-def OptimalUnivariantMicroaggregation():
+def OptimalUnivariantMicroaggregation(k,data):
+    data['row_id'] = range(len(data))
     new_df = pd.DataFrame()
     for column in range(len(data.columns) - 1):
         partition = data.iloc[:, [column, -1]]
@@ -135,8 +131,3 @@ class Graph:
         path.appendleft(start_node)
 
         return path, distance_from_start[end_node]
-
-
-example_df = OptimalUnivariantMicroaggregation()
-
-example_df.to_csv("maskedDataOUM.csv", index=False, header=False)
