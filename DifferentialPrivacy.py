@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-def localDifferentialPrivacy(epsilon,data):
+def DifferentialPrivacy(epsilon,data):
     new_df = pd.DataFrame()
 
     for column in range(len(data.columns)):
